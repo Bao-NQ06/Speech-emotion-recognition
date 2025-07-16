@@ -209,11 +209,11 @@ def extract_features_from_audio(audio_data, sr=44100, bands=128, frames=128, hop
                 pad_width = frames - mfcc.shape[1]
                 mfcc = np.pad(mfcc, ((0, 0), (0, pad_width)), mode='constant', constant_values=0)
         
-        # Create 3-channel feature map (MFCC + Delta + Delta-Delta)
+        # Create 3-channel feature map (CORRECTED ORDER to match training)
         feature_3d = np.zeros((bands, frames, 3))
         feature_3d[:, :, 0] = mfcc  # Original MFCC
-        feature_3d[:, :, 1] = librosa.feature.delta(mfcc, order=2)  # Delta-Delta
-        feature_3d[:, :, 2] = librosa.feature.delta(mfcc)  # Delta
+        feature_3d[:, :, 1] = librosa.feature.delta(mfcc)  # Delta (FIXED!)
+        feature_3d[:, :, 2] = librosa.feature.delta(mfcc, order=2)  # Delta-Delta (FIXED!)
         
         features.append(feature_3d)
     
@@ -244,7 +244,7 @@ def load_model():
 def predict_emotion(model, device, features):
     """Predict emotion from features"""
     # Emotion labels
-    emotions = ['fear', 'disgust', 'happy', 'angry', 'sad', 'neutral', 'boredom']
+    emotions = ['fear', 'disgust', 'happy', 'anger', 'sad', 'neutral', 'boredom']
     
     with torch.no_grad():
         # Convert to tensor and reshape for model input (batch, channels, height, width)
@@ -360,7 +360,7 @@ def main():
         "😨 Fear": "Anxiety, terror, fright",
         "🤢 Disgust": "Revulsion, distaste",
         "😊 Happy": "Joy, pleasure, contentment",
-        "😡 Angry": "Rage, irritation, fury",
+        "😡 Anger": "Rage, irritation, fury",
         "😢 Sad": "Sorrow, melancholy, grief",
         "😐 Neutral": "Calm, balanced, unemotional",
         "😴 Boredom": "Disinterest, weariness"
